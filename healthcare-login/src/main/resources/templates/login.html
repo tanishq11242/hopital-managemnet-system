@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Healthcare Management System - Secure multi-role login for Doctors, Administrators, and Patients">
+    <title>HealthCare Pro — Secure Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+        <div class="bg-grid"></div>
+    </div>
+
+    <!-- Floating particles -->
+    <div id="particles-container"></div>
+
+    <div class="login-container" id="login-container">
+        <!-- Header -->
+        <header class="login-header">
+            <div class="logo-wrapper">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 4L6 14v20l18 10 18-10V14L24 4z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M24 16v16M16 24h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>HealthCare<span>Pro</span></h1>
+                    <p class="tagline">Secure Healthcare Management Portal</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Role Selection -->
+        <section class="role-selection" id="role-selection">
+            <h2 class="section-title">Select Your Role</h2>
+            <p class="section-subtitle">Choose how you'd like to sign in today</p>
+
+            <div class="role-cards">
+                <!-- Doctor Card -->
+                <div class="role-card" data-role="DOCTOR" id="role-card-doctor" tabindex="0">
+                    <div class="role-card-glow"></div>
+                    <div class="role-card-content">
+                        <div class="role-icon doctor-icon">
+                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="32" cy="18" r="10" stroke="currentColor" stroke-width="2.5"/>
+                                <path d="M32 12v12M26 18h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M12 52c0-11.046 8.954-20 20-20s20 8.954 20 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                <circle cx="32" cy="46" r="4" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">Doctor</h3>
+                        <p class="role-subtitle">Medical Professional</p>
+                        <ul class="role-features">
+                            <li><span class="feature-dot"></span>Patient Records</li>
+                            <li><span class="feature-dot"></span>Appointments</li>
+                            <li><span class="feature-dot"></span>Prescriptions</li>
+                        </ul>
+                        <div class="role-arrow">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Card -->
+                <div class="role-card" data-role="ADMIN" id="role-card-admin" tabindex="0">
+                    <div class="role-card-glow"></div>
+                    <div class="role-card-content">
+                        <div class="role-icon admin-icon">
+                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="10" y="14" width="44" height="36" rx="4" stroke="currentColor" stroke-width="2.5"/>
+                                <path d="M10 24h44" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="18" cy="19" r="2" fill="currentColor"/>
+                                <circle cx="26" cy="19" r="2" fill="currentColor"/>
+                                <circle cx="34" cy="19" r="2" fill="currentColor"/>
+                                <rect x="16" y="30" width="14" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                <rect x="16" y="42" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                                <rect x="34" y="30" width="14" height="15" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">Admin</h3>
+                        <p class="role-subtitle">System Administrator</p>
+                        <ul class="role-features">
+                            <li><span class="feature-dot"></span>User Management</li>
+                            <li><span class="feature-dot"></span>System Settings</li>
+                            <li><span class="feature-dot"></span>Analytics</li>
+                        </ul>
+                        <div class="role-arrow">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Card -->
+                <div class="role-card" data-role="PATIENT" id="role-card-patient" tabindex="0">
+                    <div class="role-card-glow"></div>
+                    <div class="role-card-content">
+                        <div class="role-icon patient-icon">
+                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M32 8l3 9h10l-8 6 3 9-8-6-8 6 3-9-8-6h10l3-9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                <circle cx="32" cy="38" r="8" stroke="currentColor" stroke-width="2.5"/>
+                                <path d="M18 56c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">Patient</h3>
+                        <p class="role-subtitle">Healthcare Patient</p>
+                        <ul class="role-features">
+                            <li><span class="feature-dot"></span>Medical Records</li>
+                            <li><span class="feature-dot"></span>Book Appointments</li>
+                            <li><span class="feature-dot"></span>Prescriptions</li>
+                        </ul>
+                        <div class="role-arrow">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Form (initially hidden) -->
+        <section class="login-form-section hidden" id="login-form-section">
+            <button class="back-btn" id="back-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Back to roles</span>
+            </button>
+
+            <div class="login-form-wrapper">
+                <div class="form-header" id="form-header">
+                    <div class="selected-role-badge" id="selected-role-badge">
+                        <span class="badge-icon" id="badge-icon"></span>
+                        <span class="badge-text" id="badge-text">Doctor</span>
+                    </div>
+                    <h2 class="form-title" id="form-title">Doctor Login</h2>
+                    <p class="form-subtitle" id="form-subtitle">Enter your credentials to access the medical portal</p>
+                </div>
+
+                <form class="login-form" id="login-form" autocomplete="off">
+                    <input type="hidden" id="role-input" name="role" value="">
+
+                    <div class="input-group" id="input-group-username">
+                        <label for="username-input" class="input-label">Username</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <input type="text" id="username-input" name="username" placeholder="Enter your username" required>
+                            <span class="input-focus-line"></span>
+                        </div>
+                        <span class="input-error" id="username-error"></span>
+                    </div>
+
+                    <div class="input-group" id="input-group-password">
+                        <label for="password-input" class="input-label">Password</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </span>
+                            <input type="password" id="password-input" name="password" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility">
+                                <svg class="eye-open" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                <svg class="eye-closed hidden" viewBox="0 0 24 24" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </button>
+                            <span class="input-focus-line"></span>
+                        </div>
+                        <span class="input-error" id="password-error"></span>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember-checkbox">
+                            <span class="custom-checkbox"></span>
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="login-btn">
+                        <span class="btn-text">Sign In</span>
+                        <span class="btn-loader hidden" id="btn-loader">
+                            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                        </span>
+                        <span class="btn-icon">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Alert Message -->
+                <div class="alert-message hidden" id="alert-message">
+                    <span class="alert-icon" id="alert-icon"></span>
+                    <span class="alert-text" id="alert-text"></span>
+                </div>
+
+                <!-- Demo Credentials -->
+                <div class="demo-credentials" id="demo-credentials">
+                    <div class="demo-header">
+                        <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <span>Demo Credentials</span>
+                    </div>
+                    <div class="demo-creds-content" id="demo-creds-content"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="login-footer">
+            <p>&copy; 2026 HealthCarePro. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Support</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>
