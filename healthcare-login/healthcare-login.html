@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Healthcare Management System - Secure multi-role login for Doctors, Administrators, and Patients">
+    <title>HealthCare Pro — Secure Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-glass: rgba(255, 255, 255, 0.04);
+            --bg-glass-hover: rgba(255, 255, 255, 0.08);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --doctor-primary: #06b6d4; --doctor-secondary: #0891b2;
+            --doctor-glow: rgba(6, 182, 212, 0.25); --doctor-bg: rgba(6, 182, 212, 0.08);
+            --admin-primary: #a855f7; --admin-secondary: #9333ea;
+            --admin-glow: rgba(168, 85, 247, 0.25); --admin-bg: rgba(168, 85, 247, 0.08);
+            --patient-primary: #22c55e; --patient-secondary: #16a34a;
+            --patient-glow: rgba(34, 197, 94, 0.25); --patient-bg: rgba(34, 197, 94, 0.08);
+            --active-primary: #06b6d4; --active-secondary: #0891b2;
+            --active-glow: rgba(6, 182, 212, 0.25);
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-medium: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            overflow-x: hidden; -webkit-font-smoothing: antialiased;
+        }
+
+        /* ---- Background ---- */
+        .bg-animation { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .bg-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4; animation: orbFloat 20s ease-in-out infinite; }
+        .bg-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(6,182,212,0.3), transparent 70%); top: -200px; left: -100px; }
+        .bg-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(168,85,247,0.25), transparent 70%); bottom: -150px; right: -100px; animation-delay: -7s; }
+        .bg-orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(34,197,94,0.2), transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -14s; }
+        @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1)} 25%{transform:translate(60px,-40px) scale(1.1)} 50%{transform:translate(-30px,50px) scale(.95)} 75%{transform:translate(40px,30px) scale(1.05)} }
+        .bg-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px); background-size: 60px 60px; }
+        #particles-container { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .particle { position: absolute; width: 3px; height: 3px; background: rgba(255,255,255,0.2); border-radius: 50%; animation: particleFloat linear infinite; }
+        @keyframes particleFloat { 0%{transform:translateY(100vh) rotate(0);opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{transform:translateY(-100vh) rotate(720deg);opacity:0} }
+
+        /* ---- Login Container ---- */
+        .login-container { position: relative; z-index: 1; width: 100%; max-width: 960px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: center; }
+
+        /* ---- Header ---- */
+        .login-header { text-align: center; margin-bottom: 48px; animation: fadeInDown 0.8s ease-out; }
+        .logo-wrapper { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        .logo-icon { width: 64px; height: 64px; color: var(--active-primary); animation: logoPulse 3s ease-in-out infinite; }
+        @keyframes logoPulse { 0%,100%{transform:scale(1);filter:drop-shadow(0 0 8px var(--active-glow))} 50%{transform:scale(1.05);filter:drop-shadow(0 0 20px var(--active-glow))} }
+        .logo-text h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; }
+        .logo-text h1 span { background: linear-gradient(135deg,var(--active-primary),var(--active-secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .tagline { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+
+        /* ---- Section Titles ---- */
+        .section-title { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+        .section-subtitle { text-align: center; color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 32px; }
+
+        /* ---- Role Cards ---- */
+        .role-selection { width: 100%; animation: fadeInUp 0.8s ease-out 0.2s both; }
+        .role-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+        .role-card { position: relative; background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: var(--radius-lg); cursor: pointer; transition: all var(--transition-medium); overflow: hidden; outline: none; }
+        .role-card:hover { transform: translateY(-6px); background: var(--bg-glass-hover); }
+        .role-card::before { content:''; position:absolute; inset:0; border-radius:var(--radius-lg); opacity:0; transition:opacity var(--transition-medium); }
+        .role-card:hover::before { opacity: 1; }
+        .role-card[data-role="DOCTOR"]::before { background:linear-gradient(135deg,var(--doctor-bg),transparent 60%); }
+        .role-card[data-role="DOCTOR"]:hover { border-color:rgba(6,182,212,0.3); box-shadow:0 8px 32px var(--doctor-glow); }
+        .role-card[data-role="ADMIN"]::before { background:linear-gradient(135deg,var(--admin-bg),transparent 60%); }
+        .role-card[data-role="ADMIN"]:hover { border-color:rgba(168,85,247,0.3); box-shadow:0 8px 32px var(--admin-glow); }
+        .role-card[data-role="PATIENT"]::before { background:linear-gradient(135deg,var(--patient-bg),transparent 60%); }
+        .role-card[data-role="PATIENT"]:hover { border-color:rgba(34,197,94,0.3); box-shadow:0 8px 32px var(--patient-glow); }
+        .role-card-glow { position:absolute; top:0; left:50%; transform:translateX(-50%); width:200px; height:2px; border-radius:2px; opacity:0; transition:opacity var(--transition-medium); }
+        .role-card:hover .role-card-glow { opacity:1; }
+        .role-card[data-role="DOCTOR"] .role-card-glow { background:linear-gradient(90deg,transparent,var(--doctor-primary),transparent); box-shadow:0 0 20px var(--doctor-glow); }
+        .role-card[data-role="ADMIN"] .role-card-glow { background:linear-gradient(90deg,transparent,var(--admin-primary),transparent); box-shadow:0 0 20px var(--admin-glow); }
+        .role-card[data-role="PATIENT"] .role-card-glow { background:linear-gradient(90deg,transparent,var(--patient-primary),transparent); box-shadow:0 0 20px var(--patient-glow); }
+        .role-card-content { position:relative; z-index:1; padding:28px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+        .role-icon { width:56px; height:56px; margin-bottom:16px; transition:all var(--transition-medium); }
+        .role-card:hover .role-icon { transform:scale(1.1); }
+        .doctor-icon { color:var(--doctor-primary); }
+        .admin-icon { color:var(--admin-primary); }
+        .patient-icon { color:var(--patient-primary); }
+        .role-title { font-size:1.25rem; font-weight:700; margin-bottom:4px; }
+        .role-subtitle { font-size:0.8rem; color:var(--text-muted); margin-bottom:16px; text-transform:uppercase; letter-spacing:0.08em; font-weight:500; }
+        .role-features { list-style:none; width:100%; text-align:left; margin-bottom:16px; }
+        .role-features li { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-secondary); padding:4px 0; }
+        .feature-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+        .role-card[data-role="DOCTOR"] .feature-dot { background:var(--doctor-primary); }
+        .role-card[data-role="ADMIN"] .feature-dot { background:var(--admin-primary); }
+        .role-card[data-role="PATIENT"] .feature-dot { background:var(--patient-primary); }
+        .role-arrow { width:24px; height:24px; color:var(--text-muted); opacity:0; transform:translateX(-8px); transition:all var(--transition-medium); }
+        .role-card:hover .role-arrow { opacity:1; transform:translateX(0); }
+        .role-card[data-role="DOCTOR"]:hover .role-arrow { color:var(--doctor-primary); }
+        .role-card[data-role="ADMIN"]:hover .role-arrow { color:var(--admin-primary); }
+        .role-card[data-role="PATIENT"]:hover .role-arrow { color:var(--patient-primary); }
+
+        /* ---- Login Form Section ---- */
+        .login-form-section { width:100%; max-width:440px; animation:fadeInUp 0.5s ease-out; }
+        .login-form-section.hidden { display:none; }
+        .back-btn { display:inline-flex; align-items:center; gap:8px; background:none; border:none; color:var(--text-secondary); font-size:0.9rem; font-family:inherit; cursor:pointer; padding:8px 0; margin-bottom:24px; transition:all var(--transition-fast); }
+        .back-btn:hover { color:var(--active-primary); transform:translateX(-4px); }
+        .back-btn svg { width:18px; height:18px; }
+        .login-form-wrapper { background:var(--bg-glass); backdrop-filter:blur(24px); border:1px solid var(--border-color); border-radius:var(--radius-xl); padding:40px 36px; box-shadow:0 16px 48px rgba(0,0,0,0.6); position:relative; overflow:hidden; }
+        .login-form-wrapper::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:60%; height:2px; background:linear-gradient(90deg,transparent,var(--active-primary),transparent); border-radius:2px; }
+
+        /* ---- Form Header ---- */
+        .form-header { text-align:center; margin-bottom:32px; }
+        .selected-role-badge { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:100px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--active-primary); margin-bottom:16px; }
+        .badge-icon { width:8px; height:8px; border-radius:50%; background:var(--active-primary); animation:badgePulse 2s ease-in-out infinite; }
+        @keyframes badgePulse { 0%,100%{opacity:1;box-shadow:0 0 4px var(--active-glow)} 50%{opacity:0.5;box-shadow:0 0 12px var(--active-glow)} }
+        .form-title { font-size:1.5rem; font-weight:700; margin-bottom:8px; }
+        .form-subtitle { color:var(--text-secondary); font-size:0.9rem; }
+
+        /* ---- Input Fields ---- */
+        .input-group { margin-bottom:20px; }
+        .input-label { display:block; font-size:0.85rem; font-weight:500; color:var(--text-secondary); margin-bottom:8px; }
+        .input-wrapper { position:relative; display:flex; align-items:center; }
+        .input-icon { position:absolute; left:14px; width:20px; height:20px; color:var(--text-muted); transition:color var(--transition-fast); z-index:1; pointer-events:none; }
+        .input-wrapper input { width:100%; padding:14px 14px 14px 44px; background:rgba(255,255,255,0.04); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-primary); font-family:inherit; font-size:0.95rem; outline:none; transition:all var(--transition-fast); }
+        .input-wrapper input::placeholder { color:var(--text-muted); }
+        .input-wrapper input:focus { border-color:var(--active-primary); background:rgba(255,255,255,0.06); box-shadow:0 0 0 3px var(--active-glow); }
+        .input-wrapper:has(input:focus) .input-icon { color:var(--active-primary); }
+        .input-error { display:block; font-size:0.8rem; color:#ef4444; margin-top:6px; min-height:18px; }
+        .input-group.error .input-wrapper input { border-color:#ef4444; box-shadow:0 0 0 3px rgba(239,68,68,0.15); }
+
+        /* ---- Password Toggle ---- */
+        .password-toggle { position:absolute; right:14px; background:none; border:none; color:var(--text-muted); cursor:pointer; width:20px; height:20px; display:flex; align-items:center; justify-content:center; transition:color var(--transition-fast); z-index:1; }
+        .password-toggle:hover { color:var(--text-secondary); }
+        .password-toggle svg { width:20px; height:20px; }
+        .password-toggle .hidden { display:none; }
+
+        /* ---- Form Options ---- */
+        .form-options { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+        .remember-me { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer; user-select:none; }
+        .remember-me input[type="checkbox"] { display:none; }
+        .custom-checkbox { width:18px; height:18px; border:2px solid var(--border-color); border-radius:4px; display:flex; align-items:center; justify-content:center; transition:all var(--transition-fast); }
+        .custom-checkbox::after { content:'✓'; font-size:11px; color:white; opacity:0; transform:scale(0); transition:all var(--transition-fast); }
+        .remember-me input:checked + .custom-checkbox { background:var(--active-primary); border-color:var(--active-primary); }
+        .remember-me input:checked + .custom-checkbox::after { opacity:1; transform:scale(1); }
+        .forgot-password { font-size:0.85rem; color:var(--active-primary); text-decoration:none; transition:opacity var(--transition-fast); }
+        .forgot-password:hover { opacity:0.8; text-decoration:underline; }
+
+        /* ---- Buttons ---- */
+        .login-btn, .submit-btn { width:100%; padding:14px 24px; background:linear-gradient(135deg,var(--active-primary),var(--active-secondary)); color:white; border:none; border-radius:var(--radius-md); font-family:inherit; font-size:1rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all var(--transition-medium); position:relative; overflow:hidden; }
+        .login-btn::before, .submit-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent); opacity:0; transition:opacity var(--transition-fast); }
+        .login-btn:hover::before, .submit-btn:hover::before { opacity:1; }
+        .login-btn:hover, .submit-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px var(--active-glow); }
+        .login-btn:active, .submit-btn:active { transform:translateY(0); }
+        .login-btn .btn-icon { width:18px; height:18px; transition:transform var(--transition-fast); }
+        .login-btn:hover .btn-icon { transform:translateX(4px); }
+        .login-btn.loading .btn-text, .login-btn.loading .btn-icon { display:none; }
+        .login-btn.loading .btn-loader { display:block !important; }
+        .btn-loader { width:22px; height:22px; }
+        .spinner { width:22px; height:22px; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        /* ---- Alert ---- */
+        .alert-message { display:flex; align-items:center; gap:10px; padding:14px 16px; border-radius:var(--radius-md); margin-top:20px; font-size:0.875rem; font-weight:500; animation:fadeInUp 0.3s ease-out; }
+        .alert-message.hidden { display:none; }
+        .alert-message.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); color:#4ade80; }
+        .alert-message.error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#f87171; }
+        .alert-message.info { background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); color:#60a5fa; }
+        .alert-icon { font-size:1.1rem; flex-shrink:0; }
+
+        /* ---- Divider ---- */
+        .form-divider { display:flex; align-items:center; gap:16px; margin:24px 0; }
+        .form-divider::before, .form-divider::after { content:''; flex:1; height:1px; background:var(--border-color); }
+        .form-divider span { font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; font-weight:500; white-space:nowrap; }
+
+        /* ---- Alt Action Button ---- */
+        .alt-action-btn { width:100%; padding:12px 24px; background:rgba(255,255,255,0.04); color:var(--active-primary); border:1px solid var(--border-color); border-radius:var(--radius-md); font-family:inherit; font-size:0.9rem; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all var(--transition-medium); }
+        .alt-action-btn:hover { background:rgba(255,255,255,0.08); border-color:var(--active-primary); transform:translateY(-1px); }
+        .alt-action-btn svg { width:18px; height:18px; }
+
+        /* ---- OTP Section ---- */
+        .otp-section { display:none; }
+        .otp-section.visible { display:block; animation:fadeInUp 0.4s ease-out; }
+        .otp-inputs { display:flex; gap:10px; justify-content:center; margin:20px 0; }
+        .otp-inputs input { width:48px; height:56px; text-align:center; font-size:1.4rem; font-weight:700; font-family:inherit; background:rgba(255,255,255,0.04); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-primary); outline:none; transition:all var(--transition-fast); }
+        .otp-inputs input:focus { border-color:var(--active-primary); box-shadow:0 0 0 3px var(--active-glow); background:rgba(255,255,255,0.06); }
+        .otp-inputs input.filled { border-color:var(--active-primary); background:rgba(255,255,255,0.06); }
+        .otp-info { text-align:center; color:var(--text-secondary); font-size:0.85rem; margin-bottom:16px; }
+        .otp-info strong { color:var(--text-primary); }
+        .otp-timer { text-align:center; font-size:0.8rem; color:var(--text-muted); margin-top:12px; }
+        .otp-timer a { color:var(--active-primary); cursor:pointer; text-decoration:none; font-weight:500; }
+        .otp-timer a:hover { text-decoration:underline; }
+        .otp-timer a.disabled { color:var(--text-muted); pointer-events:none; }
+
+        /* ---- Registration Section ---- */
+        .register-section { display:none; }
+        .register-section.visible { display:block; animation:fadeInUp 0.4s ease-out; }
+
+        /* ---- Footer ---- */
+        .login-footer { text-align:center; margin-top:48px; animation:fadeInUp 0.8s ease-out 0.4s both; }
+        .login-footer p { color:var(--text-muted); font-size:0.8rem; margin-bottom:8px; }
+        .footer-links { display:flex; gap:20px; justify-content:center; }
+        .footer-links a { color:var(--text-muted); font-size:0.8rem; text-decoration:none; transition:color var(--transition-fast); }
+        .footer-links a:hover { color:var(--active-primary); }
+
+        /* ---- Animations ---- */
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideOut { to{opacity:0;transform:translateY(-20px) scale(.95)} }
+        @keyframes slideIn { from{opacity:0;transform:translateY(20px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 10%,50%,90%{transform:translateX(-6px)} 30%,70%{transform:translateX(6px)} }
+
+        /* ---- Responsive ---- */
+        @media(max-width:768px) {
+            .role-cards { grid-template-columns:1fr; }
+            .role-card-content { padding:20px; flex-direction:row; flex-wrap:wrap; text-align:left; }
+            .role-icon { width:44px; height:44px; margin-bottom:0; margin-right:16px; }
+            .login-form-wrapper { padding:28px 20px; }
+            .logo-text h1 { font-size:1.6rem; }
+            .login-container { padding:24px 16px; }
+            .otp-inputs input { width:42px; height:48px; font-size:1.2rem; }
+        }
+        @media(max-width:480px) {
+            .form-options { flex-direction:column; gap:12px; align-items:flex-start; }
+            .footer-links { flex-direction:column; gap:8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div><div class="bg-orb bg-orb-3"></div><div class="bg-grid"></div></div>
+    <div id="particles-container"></div>
+
+    <div class="login-container">
+        <!-- Header -->
+        <header class="login-header">
+            <div class="logo-wrapper">
+                <div class="logo-icon"><svg viewBox="0 0 48 48" fill="none"><path d="M24 4L6 14v20l18 10 18-10V14L24 4z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M24 16v16M16 24h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>
+                <div class="logo-text"><h1>HealthCare<span>Pro</span></h1><p class="tagline">Secure Healthcare Management Portal</p></div>
+            </div>
+        </header>
+
+        <!-- Role Selection -->
+        <section class="role-selection" id="role-selection">
+            <h2 class="section-title">Select Your Role</h2>
+            <p class="section-subtitle">Choose how you'd like to sign in today</p>
+            <div class="role-cards">
+                <div class="role-card" data-role="DOCTOR" tabindex="0">
+                    <div class="role-card-glow"></div>
+                    <div class="role-card-content">
+                        <div class="role-icon doctor-icon"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="18" r="10" stroke="currentColor" stroke-width="2.5"/><path d="M32 12v12M26 18h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 52c0-11.046 8.954-20 20-20s20 8.954 20 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="46" r="4" stroke="currentColor" stroke-width="2"/></svg></div>
+                        <h3 class="role-title">Doctor</h3>
+                        <p class="role-subtitle">Medical Professional</p>
+                        <ul class="role-features"><li><span class="feature-dot"></span>Patient Records</li><li><span class="feature-dot"></span>Appointments</li><li><span class="feature-dot"></span>Prescriptions</li></ul>
+                        <div class="role-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                </div>
+                <div class="role-card" data-role="ADMIN" tabindex="0">
+                    <div class="role-card-glow"></div>
+                    <div class="role-card-content">
+                        <div class="role-icon admin-icon"><svg viewBox="0 0 64 64" fill="none"><rect x="10" y="14" width="44" height="36" rx="4" stroke="currentColor" stroke-width="2.5"/><path d="M10 24h44" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2" fill="currentColor"/><circle cx="26" cy="19" r="2" fill="currentColor"/><circle cx="34" cy="19" r="2" fill="currentColor"/><rect x="16" y="30" width="14" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="16" y="42" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="34" y="30" width="14" height="15" rx="2" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                        <h3 class="role-title">Admin</h3>
+                        <p class="role-subtitle">System Administrator</p>
+                        <ul class="role-features"><li><span class="feature-dot"></span>User Management</li><li><span class="feature-dot"></span>System Settings</li><li><span class="feature-dot"></span>Analytics</li></ul>
+                        <div class="role-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                </div>
+                <div class="role-card" data-role="PATIENT" tabindex="0">
+                    <div class="role-card-glow"></div>
+                    <div class="role-card-content">
+                        <div class="role-icon patient-icon"><svg viewBox="0 0 64 64" fill="none"><path d="M32 8l3 9h10l-8 6 3 9-8-6-8 6 3-9-8-6h10l3-9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="38" r="8" stroke="currentColor" stroke-width="2.5"/><path d="M18 56c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+                        <h3 class="role-title">Patient</h3>
+                        <p class="role-subtitle">Healthcare Patient</p>
+                        <ul class="role-features"><li><span class="feature-dot"></span>Medical Records</li><li><span class="feature-dot"></span>Book Appointments</li><li><span class="feature-dot"></span>Prescriptions</li></ul>
+                        <div class="role-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Form -->
+        <section class="login-form-section hidden" id="login-form-section">
+            <button class="back-btn" id="back-btn" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Back to roles</span></button>
+            <div class="login-form-wrapper">
+                <div class="form-header">
+                    <div class="selected-role-badge"><span class="badge-icon"></span><span class="badge-text" id="badge-text">Doctor</span></div>
+                    <h2 class="form-title" id="form-title">Doctor Login</h2>
+                    <p class="form-subtitle" id="form-subtitle">Enter your credentials to access the portal</p>
+                </div>
+
+                <!-- LOGIN VIEW -->
+                <div id="view-login">
+                    <form id="login-form" autocomplete="off">
+                        <input type="hidden" id="role-input" value="">
+                        <div class="input-group" id="input-group-username">
+                            <label for="username-input" class="input-label">Username</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                                <input type="text" id="username-input" placeholder="Enter your username" required>
+                            </div>
+                            <span class="input-error" id="username-error"></span>
+                        </div>
+                        <div class="input-group" id="input-group-password">
+                            <label for="password-input" class="input-label">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+                                <input type="password" id="password-input" placeholder="Enter your password" required>
+                                <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility">
+                                    <svg class="eye-open" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                    <svg class="eye-closed hidden" viewBox="0 0 24 24" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
+                            </div>
+                            <span class="input-error" id="password-error"></span>
+                        </div>
+                        <div class="form-options">
+                            <label class="remember-me"><input type="checkbox"><span class="custom-checkbox"></span><span>Remember me</span></label>
+                            <a href="#" class="forgot-password">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="login-btn" id="login-btn">
+                            <span class="btn-text">Sign In</span>
+                            <span class="btn-loader hidden"><svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg></span>
+                            <span class="btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        </button>
+                    </form>
+                    <div class="form-divider"><span>or</span></div>
+                    <button class="alt-action-btn" id="alt-action-btn" type="button">
+                        <svg id="alt-icon-otp" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M22 7l-10 7L2 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg id="alt-icon-register" style="display:none" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span id="alt-action-text">New here? Verify via OTP</span>
+                    </button>
+                </div>
+
+                <!-- OTP VIEW (Doctor/Admin) -->
+                <div class="otp-section" id="view-otp">
+                    <form id="otp-email-form" autocomplete="off">
+                        <div class="input-group" id="input-group-otp-email">
+                            <label class="input-label">Official Email Address</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M22 7l-10 7L2 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                                <input type="email" id="otp-email-input" placeholder="Enter your official email" required>
+                            </div>
+                            <span class="input-error" id="otp-email-error"></span>
+                        </div>
+                        <button type="submit" class="submit-btn" id="send-otp-btn">
+                            <span>Send OTP</span>
+                            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </form>
+                    <div id="otp-verify-section" style="display:none">
+                        <div class="otp-info">OTP sent to <strong id="otp-sent-email">email@example.com</strong></div>
+                        <div class="otp-inputs" id="otp-inputs">
+                            <input type="text" maxlength="1" data-index="0" inputmode="numeric">
+                            <input type="text" maxlength="1" data-index="1" inputmode="numeric">
+                            <input type="text" maxlength="1" data-index="2" inputmode="numeric">
+                            <input type="text" maxlength="1" data-index="3" inputmode="numeric">
+                            <input type="text" maxlength="1" data-index="4" inputmode="numeric">
+                            <input type="text" maxlength="1" data-index="5" inputmode="numeric">
+                        </div>
+                        <button type="button" class="submit-btn" id="verify-otp-btn">
+                            <span>Verify & Sign In</span>
+                            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <div class="otp-timer" id="otp-timer">Resend OTP in <strong id="timer-count">30</strong>s &nbsp;|&nbsp; <a id="resend-otp-link" class="disabled">Resend OTP</a></div>
+                    </div>
+                    <div class="form-divider"><span>or</span></div>
+                    <button class="alt-action-btn" id="back-to-login-from-otp" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>Sign in with ID & Password</span>
+                    </button>
+                </div>
+
+                <!-- PATIENT REGISTRATION VIEW -->
+                <div class="register-section" id="view-register">
+                    <form id="register-form" autocomplete="off">
+                        <div class="input-group" id="input-group-reg-name">
+                            <label class="input-label">Full Name</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                                <input type="text" id="reg-name-input" placeholder="Enter your full name" required>
+                            </div>
+                            <span class="input-error" id="reg-name-error"></span>
+                        </div>
+                        <div class="input-group" id="input-group-reg-email">
+                            <label class="input-label">Email Address</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M22 7l-10 7L2 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                                <input type="email" id="reg-email-input" placeholder="Enter your email" required>
+                            </div>
+                            <span class="input-error" id="reg-email-error"></span>
+                        </div>
+                        <div class="input-group" id="input-group-reg-phone">
+                            <label class="input-label">Phone Number</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2"/></svg></span>
+                                <input type="tel" id="reg-phone-input" placeholder="Enter your phone number" required>
+                            </div>
+                            <span class="input-error" id="reg-phone-error"></span>
+                        </div>
+                        <div class="input-group" id="input-group-reg-username">
+                            <label class="input-label">Choose a Username</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                                <input type="text" id="reg-username-input" placeholder="Choose a username" required>
+                            </div>
+                            <span class="input-error" id="reg-username-error"></span>
+                        </div>
+                        <div class="input-group" id="input-group-reg-password">
+                            <label class="input-label">Create Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+                                <input type="password" id="reg-password-input" placeholder="Create a strong password" required>
+                            </div>
+                            <span class="input-error" id="reg-password-error"></span>
+                        </div>
+                        <div class="input-group" id="input-group-reg-confirm">
+                            <label class="input-label">Confirm Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                                <input type="password" id="reg-confirm-input" placeholder="Confirm your password" required>
+                            </div>
+                            <span class="input-error" id="reg-confirm-error"></span>
+                        </div>
+                        <button type="submit" class="submit-btn" style="margin-top:8px">
+                            <span>Create Account</span>
+                            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </form>
+                    <div class="form-divider"><span>or</span></div>
+                    <button class="alt-action-btn" id="back-to-login-from-register" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>Already have an account? Sign In</span>
+                    </button>
+                </div>
+
+                <!-- Alert -->
+                <div class="alert-message hidden" id="alert-message">
+                    <span class="alert-icon" id="alert-icon"></span>
+                    <span class="alert-text" id="alert-text"></span>
+                </div>
+            </div>
+        </section>
+
+        <footer class="login-footer">
+            <p>&copy; 2026 HealthCarePro. All rights reserved.</p>
+            <div class="footer-links"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Support</a></div>
+        </footer>
+    </div>
+
+    <script>
+    (function(){
+        const USERS = [
+            { id:1, username:'doctor',   password:'doctor123', fullName:'Dr. Sarah Johnson', email:'sarah.johnson@hospital.com', role:'DOCTOR' },
+            { id:2, username:'dr.smith', password:'smith456',  fullName:'Dr. James Smith',   email:'james.smith@hospital.com',   role:'DOCTOR' },
+            { id:3, username:'admin',    password:'admin123',  fullName:'Alex Thompson',     email:'alex.thompson@hospital.com', role:'ADMIN' },
+            { id:4, username:'sysadmin', password:'sys456',    fullName:'Morgan Lee',        email:'morgan.lee@hospital.com',    role:'ADMIN' },
+            { id:5, username:'patient',  password:'patient123',fullName:'Emily Davis',       email:'emily.davis@email.com',      role:'PATIENT' },
+            { id:6, username:'john.doe', password:'john456',   fullName:'John Doe',          email:'john.doe@email.com',         role:'PATIENT' }
+        ];
+
+        const VALID_OTP_EMAILS = {
+            DOCTOR: ['sarah.johnson@hospital.com','james.smith@hospital.com'],
+            ADMIN:  ['alex.thompson@hospital.com','morgan.lee@hospital.com']
+        };
+
+        const roleConfig = {
+            DOCTOR: { title:'Doctor Login', subtitle:'Enter your credentials to access the medical portal', badge:'Doctor', primary:'#06b6d4', secondary:'#0891b2', glow:'rgba(6,182,212,0.25)' },
+            ADMIN:  { title:'Admin Login',  subtitle:'Enter your credentials to access the administration panel', badge:'Administrator', primary:'#a855f7', secondary:'#9333ea', glow:'rgba(168,85,247,0.25)' },
+            PATIENT:{ title:'Patient Login', subtitle:'Enter your credentials to access your health portal', badge:'Patient', primary:'#22c55e', secondary:'#16a34a', glow:'rgba(34,197,94,0.25)' }
+        };
+
+        let selectedRole = null, generatedOtp = null, otpTimerInterval = null, otpEmail = '';
+
+        const $ = id => document.getElementById(id);
+        const roleSelection = $('role-selection'), loginFormSection = $('login-form-section');
+        const viewLogin = $('view-login'), viewOtp = $('view-otp'), viewRegister = $('view-register');
+        const loginForm = $('login-form'), roleInput = $('role-input'), backBtn = $('back-btn'), loginBtn = $('login-btn');
+        const usernameInput = $('username-input'), passwordInput = $('password-input'), passwordToggle = $('password-toggle');
+        const alertMessage = $('alert-message'), alertIcon = $('alert-icon'), alertText = $('alert-text');
+        const badgeText = $('badge-text'), formTitle = $('form-title'), formSubtitle = $('form-subtitle');
+        const altActionBtn = $('alt-action-btn'), altActionText = $('alt-action-text');
+        const altIconOtp = $('alt-icon-otp'), altIconRegister = $('alt-icon-register');
+        const otpEmailForm = $('otp-email-form'), otpEmailInput = $('otp-email-input');
+        const otpVerifySection = $('otp-verify-section'), otpSentEmail = $('otp-sent-email');
+        const verifyOtpBtn = $('verify-otp-btn'), timerCount = $('timer-count'), resendOtpLink = $('resend-otp-link');
+        const registerForm = $('register-form');
+
+        // Particles
+        const pc = $('particles-container');
+        for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(15+Math.random()*25)+'s';p.style.animationDelay=-(Math.random()*30)+'s';const s=(2+Math.random()*3)+'px';p.style.width=s;p.style.height=s;p.style.opacity=0.1+Math.random()*0.2;pc.appendChild(p);}
+
+        function setColors(role){const c=roleConfig[role];document.documentElement.style.setProperty('--active-primary',c.primary);document.documentElement.style.setProperty('--active-secondary',c.secondary);document.documentElement.style.setProperty('--active-glow',c.glow);}
+        function showAlert(type,msg){alertMessage.className=`alert-message ${type}`;alertIcon.textContent=type==='success'?'✓':type==='error'?'✕':'ℹ';alertText.textContent=msg;}
+        function hideAlert(){alertMessage.className='alert-message hidden';}
+        function showError(f,m){const g=document.getElementById(`input-group-${f}`);const e=document.getElementById(`${f}-error`);if(g)g.classList.add('error');if(e)e.textContent=m;}
+        function clearError(f){const g=document.getElementById(`input-group-${f}`);const e=document.getElementById(`${f}-error`);if(g)g.classList.remove('error');if(e)e.textContent='';}
+
+        function resetLoginBtn(){
+            loginBtn.classList.remove('loading'); loginBtn.disabled=false; loginBtn.style.background='';
+            loginBtn.innerHTML='<span class="btn-text">Sign In</span><span class="btn-loader hidden"><svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg></span><span class="btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+        }
+
+        function switchView(view){
+            viewLogin.style.display = view==='login'?'block':'none';
+            viewOtp.className = view==='otp'?'otp-section visible':'otp-section';
+            viewRegister.className = view==='register'?'register-section visible':'register-section';
+            hideAlert();
+            if(view==='otp'){
+                formTitle.textContent = roleConfig[selectedRole].badge+' — OTP Verification';
+                formSubtitle.textContent = 'Verify your identity via email one-time password';
+                otpEmailForm.style.display='block'; otpVerifySection.style.display='none'; otpEmailInput.value='';
+            } else if(view==='register'){
+                formTitle.textContent = 'Create Patient Account';
+                formSubtitle.textContent = 'Fill in your details to register as a new patient';
+                registerForm.reset();
+            } else {
+                const cfg = roleConfig[selectedRole];
+                formTitle.textContent = cfg.title; formSubtitle.textContent = cfg.subtitle;
+            }
+        }
+
+        // Role Cards
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', () => selectRole(card.dataset.role));
+            card.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();selectRole(card.dataset.role);} });
+        });
+
+        function selectRole(role){
+            selectedRole = role; const cfg = roleConfig[role];
+            setColors(role); roleInput.value = role; badgeText.textContent = cfg.badge;
+            formTitle.textContent = cfg.title; formSubtitle.textContent = cfg.subtitle;
+            if(role==='PATIENT'){altIconOtp.style.display='none';altIconRegister.style.display='';altActionText.textContent="Don't have an account? Create one";}
+            else{altIconOtp.style.display='';altIconRegister.style.display='none';altActionText.textContent='New here? Verify via OTP';}
+            loginForm.reset(); hideAlert(); resetLoginBtn();
+            ['username','password'].forEach(clearError); switchView('login');
+            roleSelection.style.animation='slideOut 0.3s ease-out forwards';
+            setTimeout(()=>{roleSelection.style.display='none';loginFormSection.classList.remove('hidden');loginFormSection.style.animation='slideIn 0.4s ease-out forwards';usernameInput.focus();},300);
+        }
+
+        backBtn.addEventListener('click',()=>{
+            clearInterval(otpTimerInterval);
+            loginFormSection.style.animation='slideOut 0.3s ease-out forwards';
+            setTimeout(()=>{loginFormSection.classList.add('hidden');loginFormSection.style.animation='';roleSelection.style.display='';roleSelection.style.animation='slideIn 0.4s ease-out forwards';switchView('login');resetLoginBtn();},300);
+        });
+
+        passwordToggle.addEventListener('click',()=>{
+            const is=passwordInput.type==='password';passwordInput.type=is?'text':'password';
+            passwordToggle.querySelector('.eye-open').classList.toggle('hidden');
+            passwordToggle.querySelector('.eye-closed').classList.toggle('hidden');
+        });
+
+        usernameInput.addEventListener('input',()=>{if(usernameInput.value.trim())clearError('username');});
+        passwordInput.addEventListener('input',()=>{if(passwordInput.value.trim())clearError('password');});
+
+        altActionBtn.addEventListener('click',()=>{if(selectedRole==='PATIENT')switchView('register');else switchView('otp');});
+        $('back-to-login-from-otp').addEventListener('click',()=>{clearInterval(otpTimerInterval);switchView('login');});
+        $('back-to-login-from-register').addEventListener('click',()=>switchView('login'));
+
+        // ---- Login Submit ----
+        loginForm.addEventListener('submit', e=>{
+            e.preventDefault(); hideAlert();
+            let ok=true;
+            if(!usernameInput.value.trim()){showError('username','Username is required');ok=false;}else clearError('username');
+            if(!passwordInput.value.trim()){showError('password','Password is required');ok=false;}else clearError('password');
+            if(!ok)return;
+            loginBtn.classList.add('loading'); loginBtn.disabled=true;
+            setTimeout(()=>{
+                const matched=USERS.find(u=>u.username.toLowerCase()===usernameInput.value.trim().toLowerCase()&&u.password===passwordInput.value&&u.role===selectedRole);
+                if(matched){
+                    showAlert('success',`Login successful! Welcome, ${matched.fullName}`);
+                    loginBtn.style.background='linear-gradient(135deg,#22c55e,#16a34a)';
+                    loginBtn.innerHTML='<span class="btn-text">✓ Success!</span>';
+                } else {
+                    const byName=USERS.find(u=>u.username.toLowerCase()===usernameInput.value.trim().toLowerCase());
+                    if(!byName) showAlert('error','No account found with this username');
+                    else{const byPass=USERS.find(u=>u.username.toLowerCase()===usernameInput.value.trim().toLowerCase()&&u.password===passwordInput.value);
+                    if(!byPass) showAlert('error','Incorrect password. Please try again');
+                    else showAlert('error',`This account does not have ${roleConfig[selectedRole].badge} access.`);}
+                    loginForm.style.animation='shake 0.5s ease-in-out';
+                    setTimeout(()=>{loginForm.style.animation='';},500);
+                    loginBtn.classList.remove('loading'); loginBtn.disabled=false;
+                }
+            },800);
+        });
+
+        // ---- OTP Flow ----
+        function generateOtp(){return String(Math.floor(100000+Math.random()*900000));}
+        function startOtpTimer(){
+            let s=30;timerCount.textContent=s;resendOtpLink.classList.add('disabled');clearInterval(otpTimerInterval);
+            otpTimerInterval=setInterval(()=>{s--;timerCount.textContent=s;if(s<=0){clearInterval(otpTimerInterval);resendOtpLink.classList.remove('disabled');}},1000);
+        }
+
+        otpEmailForm.addEventListener('submit',e=>{
+            e.preventDefault();hideAlert();
+            const email=otpEmailInput.value.trim();
+            if(!email){showError('otp-email','Email is required');return;}clearError('otp-email');
+            const valid=VALID_OTP_EMAILS[selectedRole]||[];
+            if(!valid.includes(email.toLowerCase())){showAlert('error','This email is not registered. Please use your official email.');return;}
+            otpEmail=email;generatedOtp=generateOtp();
+            console.log(`[OTP] ${generatedOtp} sent to ${email}`);
+            otpSentEmail.textContent=email;otpEmailForm.style.display='none';otpVerifySection.style.display='block';
+            showAlert('info',`OTP sent to ${email} (Check console: ${generatedOtp})`);startOtpTimer();
+            document.querySelectorAll('#otp-inputs input')[0].focus();
+        });
+
+        const otpInputs=document.querySelectorAll('#otp-inputs input');
+        otpInputs.forEach((inp,idx)=>{
+            inp.addEventListener('input',e=>{const v=e.target.value.replace(/[^0-9]/g,'');e.target.value=v;if(v){e.target.classList.add('filled');if(idx<otpInputs.length-1)otpInputs[idx+1].focus();}else e.target.classList.remove('filled');});
+            inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!e.target.value&&idx>0){otpInputs[idx-1].focus();otpInputs[idx-1].value='';otpInputs[idx-1].classList.remove('filled');}});
+            inp.addEventListener('paste',e=>{e.preventDefault();const p=(e.clipboardData||window.clipboardData).getData('text').replace(/[^0-9]/g,'').slice(0,6);p.split('').forEach((ch,i)=>{if(otpInputs[i]){otpInputs[i].value=ch;otpInputs[i].classList.add('filled');}});if(p.length>0)otpInputs[Math.min(p.length,otpInputs.length-1)].focus();});
+        });
+
+        verifyOtpBtn.addEventListener('click',()=>{
+            hideAlert();const entered=Array.from(otpInputs).map(i=>i.value).join('');
+            if(entered.length<6){showAlert('error','Please enter the complete 6-digit OTP');return;}
+            if(entered===generatedOtp){
+                const user=USERS.find(u=>u.email.toLowerCase()===otpEmail.toLowerCase());
+                const name=user?user.fullName:roleConfig[selectedRole].badge;
+                showAlert('success',`OTP verified successfully! Welcome, ${name}`);clearInterval(otpTimerInterval);
+            } else {
+                showAlert('error','Invalid OTP. Please check and try again.');
+                otpInputs.forEach(i=>{i.value='';i.classList.remove('filled');});otpInputs[0].focus();
+            }
+        });
+
+        resendOtpLink.addEventListener('click',e=>{
+            e.preventDefault();if(resendOtpLink.classList.contains('disabled'))return;
+            generatedOtp=generateOtp();console.log(`[OTP] New: ${generatedOtp} to ${otpEmail}`);
+            showAlert('info',`New OTP sent! (Console: ${generatedOtp})`);startOtpTimer();
+            otpInputs.forEach(i=>{i.value='';i.classList.remove('filled');});otpInputs[0].focus();
+        });
+
+        // ---- Patient Registration ----
+        registerForm.addEventListener('submit',e=>{
+            e.preventDefault();hideAlert();let ok=true;
+            const name=$('reg-name-input').value.trim(), email=$('reg-email-input').value.trim();
+            const phone=$('reg-phone-input').value.trim(), uname=$('reg-username-input').value.trim();
+            const pass=$('reg-password-input').value, confirm=$('reg-confirm-input').value;
+
+            if(!name){showError('reg-name','Full name is required');ok=false;}else clearError('reg-name');
+            if(!email){showError('reg-email','Email is required');ok=false;}
+            else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError('reg-email','Enter a valid email');ok=false;}
+            else clearError('reg-email');
+            if(!phone){showError('reg-phone','Phone number is required');ok=false;}
+            else if(phone.length<10){showError('reg-phone','Enter a valid phone number');ok=false;}
+            else clearError('reg-phone');
+            if(!uname){showError('reg-username','Username is required');ok=false;}
+            else if(uname.length<3){showError('reg-username','Username must be at least 3 characters');ok=false;}
+            else if(USERS.find(u=>u.username.toLowerCase()===uname.toLowerCase())){showError('reg-username','Username already taken');ok=false;}
+            else clearError('reg-username');
+            if(!pass){showError('reg-password','Password is required');ok=false;}
+            else if(pass.length<6){showError('reg-password','Password must be at least 6 characters');ok=false;}
+            else clearError('reg-password');
+            if(pass!==confirm){showError('reg-confirm','Passwords do not match');ok=false;}else clearError('reg-confirm');
+            if(!ok)return;
+
+            USERS.push({id:USERS.length+1,username:uname,password:pass,fullName:name,email:email,role:'PATIENT'});
+            showAlert('success',`Account created successfully! Welcome, ${name}. You can now sign in.`);
+        });
+
+        document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!loginFormSection.classList.contains('hidden'))backBtn.click();});
+    })();
+    </script>
+</body>
+</html>
